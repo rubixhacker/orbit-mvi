@@ -12,8 +12,18 @@ struct ComposeView: UIViewControllerRepresentable {
 
 struct ContentView: View {
     var body: some View {
-        ComposeView()
-                .ignoresSafeArea(.keyboard) // Compose has own keyboard handler
+        TabView {
+            ComposeView()
+                    .ignoresSafeArea(.keyboard) // Compose has own keyboard handler
+                    .tabItem {
+                        Label("Compose", systemImage: "star")
+                    }
+
+            PostListView()
+                .tabItem {
+                    Label("SwiftUI", systemImage: "list.bullet")
+                }
+        }
     }
 }
 
