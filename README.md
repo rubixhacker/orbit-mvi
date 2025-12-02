@@ -40,6 +40,7 @@ Key features:
 - [Test](https://orbit-mvi.org/Test/)
 - [Dokka source code documentation](https://orbit-mvi.org/dokka/)
 - [Resources](https://orbit-mvi.org/resources)
+- [Integrating with The Composable Architecture (TCA)](docs/TCA_INTEGRATION.md)
 
 ### Articles & Talks
 
