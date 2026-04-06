@@ -29,9 +29,12 @@ plugins {
     id(libs.plugins.dokkaPlugin.get().pluginId)
     kotlin("plugin.serialization")
     id("kotlin-parcelize")
+    alias(libs.plugins.kmp.nativecoroutines)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
+    applyDefaultHierarchyTemplate()
     // Note no mingw support in lifecycle-viewmodel
 
     androidTarget()
@@ -53,7 +56,6 @@ kotlin {
     iosSimulatorArm64()
     watchosSimulatorArm64()
     watchosX64()
-    watchosArm32()
     watchosArm64()
     tvosSimulatorArm64()
     tvosX64()
@@ -67,7 +69,6 @@ kotlin {
         macosArm64(),
         watchosSimulatorArm64(),
         watchosX64(),
-        watchosArm32(),
         watchosArm64(),
         tvosSimulatorArm64(),
         tvosX64(),
@@ -91,6 +92,9 @@ kotlin {
             api(libs.androidxLifecycleViewmodelSavedState)
             api(libs.androidxLifecycleRuntime)
         }
+
+        // Create a source set for all Apple targets
+        val appleMain by getting
 
         commonTest.dependencies {
             implementation(project(":orbit-test"))

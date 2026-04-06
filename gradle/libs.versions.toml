@@ -18,6 +18,8 @@
 
 kotlin = "2.1.21"
 coroutines = "1.10.2"
+kmp-nativecoroutines = "1.0.0-ALPHA-35"
+ksp = "2.1.21-2.0.2"
 
 # Plugins
 binaryCompatibilityValidator = "0.17.0"
@@ -170,3 +172,5 @@ gradleMavenPublishPlugin = { id = "com.vanniktech.maven.publish", version.ref = 
 gradleVersionsPlugin = { id = "com.github.ben-manes.versions", version.ref = "gradleVersionsPlugin" }
 kotlin-pluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 markdownlintGradlePlugin = { id = "com.appmattus.markdown", version.ref = "markdownLintPlugin" }
+kmp-nativecoroutines = { id = "com.rickclephas.kmp.nativecoroutines", version.ref = "kmp-nativecoroutines" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
