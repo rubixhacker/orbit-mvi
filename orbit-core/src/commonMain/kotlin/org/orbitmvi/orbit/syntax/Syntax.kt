@@ -86,7 +86,7 @@ public class Syntax<S : Any, SE : Any>(public val containerContext: ContainerCon
     @OrbitDsl
     public fun launch(block: suspend Syntax<S, SE>.() -> Unit) {
         containerContext.scope.launch {
-            Syntax(containerContext).block()
+            Syntax(containerContext.copy(scope = this)).block()
         }
     }
 
@@ -113,8 +113,9 @@ public class Syntax<S : Any, SE : Any>(public val containerContext: ContainerCon
     @OrbitDsl
     public fun launchOnSubscription(block: suspend Syntax<S, SE>.() -> Unit) {
         containerContext.scope.launch {
-            containerContext.subscribedCounter.subscribed.mapLatest {
-                if (it.isSubscribed) Syntax(containerContext).block() else null
+            val scopedContext = containerContext.copy(scope = this)
+            scopedContext.subscribedCounter.subscribed.mapLatest {
+                if (it.isSubscribed) Syntax(scopedContext).block() else null
             }.collect()
         }
     }

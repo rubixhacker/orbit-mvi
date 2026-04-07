@@ -66,7 +66,7 @@ public class SubStateSyntax<S : Any, SE : Any, T : S>(private val containerConte
     @OrbitDsl
     public fun launch(block: suspend SubStateSyntax<S, SE, T>.() -> Unit) {
         containerContext.scope.launch {
-            SubStateSyntax(containerContext).block()
+            SubStateSyntax(containerContext.copy(scope = this)).block()
         }
     }
 
@@ -79,8 +79,9 @@ public class SubStateSyntax<S : Any, SE : Any, T : S>(private val containerConte
     @OrbitDsl
     public fun launchOnSubscription(block: suspend SubStateSyntax<S, SE, T>.() -> Unit) {
         containerContext.scope.launch {
-            containerContext.subscribedCounter.subscribed.mapLatest {
-                if (it.isSubscribed) SubStateSyntax(containerContext).block() else null
+            val scopedContext = containerContext.copy(scope = this)
+            scopedContext.subscribedCounter.subscribed.mapLatest {
+                if (it.isSubscribed) SubStateSyntax(scopedContext).block() else null
             }.collect()
         }
     }
