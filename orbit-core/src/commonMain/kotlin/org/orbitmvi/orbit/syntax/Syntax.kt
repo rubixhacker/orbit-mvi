@@ -131,6 +131,11 @@ public class Syntax<S : Any, SE : Any>(public val containerContext: ContainerCon
      *
      * @param block the lambda to run when we have active subscribers.
      */
+    @Deprecated(
+        message = "Use launchOnSubscription instead. launchOnSubscription provides a Syntax receiver " +
+            "and does not block the calling coroutine, allowing multiple concurrent launches.",
+        replaceWith = ReplaceWith("launchOnSubscription { block() }")
+    )
     @OptIn(ExperimentalCoroutinesApi::class)
     @OrbitDsl
     public suspend fun repeatOnSubscription(

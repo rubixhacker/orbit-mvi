@@ -37,6 +37,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress("DEPRECATION")
 internal class SimpleDslRepeatOnSubscriptionTest {
 
     private val testScope = CoroutineScope(Dispatchers.Unconfined)

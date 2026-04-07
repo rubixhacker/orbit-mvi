@@ -27,6 +27,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.time.Duration.Companion.milliseconds
 
+@Suppress("DEPRECATION")
 internal class RepeatOnSubscriptionTest {
     private val initialState = State()
 
