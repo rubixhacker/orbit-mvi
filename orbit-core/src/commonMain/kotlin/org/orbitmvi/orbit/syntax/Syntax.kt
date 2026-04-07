@@ -64,6 +64,33 @@ public class Syntax<S : Any, SE : Any>(public val containerContext: ContainerCon
     }
 
     /**
+     * Launches a new coroutine as a child of the current intent's scope.
+     *
+     * This is useful for collecting multiple flows concurrently within an intent or [onCreate][org.orbitmvi.orbit.orbitContainer].
+     * Each launched coroutine runs concurrently, and the parent intent stays alive while children run.
+     * Children are cancelled when the container is cancelled.
+     *
+     * ```
+     * override val container = scope.orbitContainer<State, SideEffect>(initialState) {
+     *     launch {
+     *         flow1.collect { value -> reduce { state.copy(field1 = value) } }
+     *     }
+     *     launch {
+     *         flow2.collect { value -> reduce { state.copy(field2 = value) } }
+     *     }
+     * }
+     * ```
+     *
+     * @param block the lambda to execute in the launched coroutine, with access to the orbit DSL.
+     */
+    @OrbitDsl
+    public fun launch(block: suspend Syntax<S, SE>.() -> Unit) {
+        containerContext.scope.launch {
+            Syntax(containerContext).block()
+        }
+    }
+
+    /**
      * Starts and stops the provided block of code based on the number of subscribers to the
      * [OrbitContainer.refCountStateFlow] and [OrbitContainer.refCountSideEffectFlow].
      *
