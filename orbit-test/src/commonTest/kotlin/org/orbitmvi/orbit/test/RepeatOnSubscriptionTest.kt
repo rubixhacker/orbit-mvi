@@ -24,6 +24,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress("DEPRECATION")
 class RepeatOnSubscriptionTest {
     private val initialState = State()
 
