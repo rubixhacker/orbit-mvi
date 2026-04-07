@@ -51,7 +51,8 @@ internal class SimpleDslRepeatOnSubscriptionTest {
             postSideEffect = {},
             reduce = {},
             subscribedCounter = testSubscribedCounter,
-            stateFlow = MutableStateFlow(Unit)
+            stateFlow = MutableStateFlow(Unit),
+            scope = testScope
         )
     )
 
