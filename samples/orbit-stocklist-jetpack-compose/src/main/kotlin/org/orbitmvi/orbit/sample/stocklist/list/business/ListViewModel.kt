@@ -33,7 +33,7 @@ class ListViewModel @Inject constructor(
     override val container = orbitContainer<ListState, ListSideEffect>(ListState(), savedStateHandle) { requestStocks() }
 
     private fun requestStocks() = intent(registerIdling = false) {
-        repeatOnSubscription {
+        launchOnSubscription {
             stockRepository.stockList().collect {
                 reduce {
                     state.copy(stocks = it)
