@@ -19,6 +19,7 @@ class UseOrbitLaunchRule(config: Config) : Rule(config) {
         debt = Debt.FIVE_MINS
     )
 
+    @Suppress("ReturnCount")
     override fun visitCallExpression(expression: KtCallExpression) {
         super.visitCallExpression(expression)
 
