@@ -91,6 +91,35 @@ public class Syntax<S : Any, SE : Any>(public val containerContext: ContainerCon
     }
 
     /**
+     * Launches a new subscriber-aware coroutine as a child of the current intent's scope.
+     *
+     * The block runs when [OrbitContainer.refCountStateFlow] or [OrbitContainer.refCountSideEffectFlow]
+     * have active subscribers, and is cancelled when subscribers reach zero (with debounce via
+     * [SettingsBuilder.repeatOnSubscribedStopTimeout]).
+     *
+     * This is useful for collecting hot flows that should only run while the UI is subscribed.
+     *
+     * ```
+     * override val container = scope.orbitContainer<State, SideEffect>(initialState) {
+     *     launchOnSubscription {
+     *         hotFlow.collect { value -> reduce { state.copy(data = value) } }
+     *     }
+     * }
+     * ```
+     *
+     * @param block the lambda to execute when subscribers are active, with access to the orbit DSL.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @OrbitDsl
+    public fun launchOnSubscription(block: suspend Syntax<S, SE>.() -> Unit) {
+        containerContext.scope.launch {
+            containerContext.subscribedCounter.subscribed.mapLatest {
+                if (it.isSubscribed) Syntax(containerContext).block() else null
+            }.collect()
+        }
+    }
+
+    /**
      * Starts and stops the provided block of code based on the number of subscribers to the
      * [OrbitContainer.refCountStateFlow] and [OrbitContainer.refCountSideEffectFlow].
      *
