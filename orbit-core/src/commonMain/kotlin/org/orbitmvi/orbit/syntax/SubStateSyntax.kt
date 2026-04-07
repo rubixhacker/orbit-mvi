@@ -59,6 +59,34 @@ public class SubStateSyntax<S : Any, SE : Any, T : S>(private val containerConte
     }
 
     /**
+     * Launches a new coroutine as a child of the current intent's scope.
+     *
+     * @param block the lambda to execute in the launched coroutine, with access to the orbit DSL.
+     */
+    @OrbitDsl
+    public fun launch(block: suspend SubStateSyntax<S, SE, T>.() -> Unit) {
+        containerContext.scope.launch {
+            SubStateSyntax(containerContext.copy(scope = this)).block()
+        }
+    }
+
+    /**
+     * Launches a new subscriber-aware coroutine as a child of the current intent's scope.
+     *
+     * @param block the lambda to execute when subscribers are active, with access to the orbit DSL.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @OrbitDsl
+    public fun launchOnSubscription(block: suspend SubStateSyntax<S, SE, T>.() -> Unit) {
+        containerContext.scope.launch {
+            val scopedContext = containerContext.copy(scope = this)
+            scopedContext.subscribedCounter.subscribed.mapLatest {
+                if (it.isSubscribed) SubStateSyntax(scopedContext).block() else null
+            }.collect()
+        }
+    }
+
+    /**
      * Starts and stops the provided block of code based on the number of subscribers to the
      * [OrbitContainer.refCountStateFlow] and [OrbitContainer.refCountSideEffectFlow].
      *
@@ -70,6 +98,11 @@ public class SubStateSyntax<S : Any, SE : Any, T : S>(private val containerConte
      *
      * @param block the lambda to run when we have active subscribers.
      */
+    @Deprecated(
+        message = "Use launchOnSubscription instead. launchOnSubscription provides a SubStateSyntax receiver " +
+            "and does not block the calling coroutine, allowing multiple concurrent launches.",
+        replaceWith = ReplaceWith("launchOnSubscription { block() }")
+    )
     @OptIn(ExperimentalCoroutinesApi::class)
     @OrbitDsl
     public suspend fun repeatOnSubscription(

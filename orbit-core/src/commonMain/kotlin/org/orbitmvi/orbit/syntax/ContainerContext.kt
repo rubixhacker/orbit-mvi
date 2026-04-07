@@ -20,6 +20,7 @@
 
 package org.orbitmvi.orbit.syntax
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.orbitmvi.orbit.RealSettings
 import org.orbitmvi.orbit.annotation.OrbitInternal
@@ -32,6 +33,7 @@ public data class ContainerContext<S : Any, SE : Any>(
     public val reduce: suspend ((S) -> S) -> Unit,
     public val subscribedCounter: SubscribedCounter,
     public val stateFlow: StateFlow<S>,
+    public val scope: CoroutineScope,
 ) {
     public val state: S
         get() = stateFlow.value

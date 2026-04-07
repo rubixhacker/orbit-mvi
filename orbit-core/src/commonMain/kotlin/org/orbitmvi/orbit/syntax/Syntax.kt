@@ -64,6 +64,63 @@ public class Syntax<S : Any, SE : Any>(public val containerContext: ContainerCon
     }
 
     /**
+     * Launches a new coroutine as a child of the current intent's scope.
+     *
+     * This is useful for collecting multiple flows concurrently within an intent or [onCreate][org.orbitmvi.orbit.orbitContainer].
+     * Each launched coroutine runs concurrently, and the parent intent stays alive while children run.
+     * Children are cancelled when the container is cancelled.
+     *
+     * ```
+     * override val container = scope.orbitContainer<State, SideEffect>(initialState) {
+     *     launch {
+     *         flow1.collect { value -> reduce { state.copy(field1 = value) } }
+     *     }
+     *     launch {
+     *         flow2.collect { value -> reduce { state.copy(field2 = value) } }
+     *     }
+     * }
+     * ```
+     *
+     * @param block the lambda to execute in the launched coroutine, with access to the orbit DSL.
+     */
+    @OrbitDsl
+    public fun launch(block: suspend Syntax<S, SE>.() -> Unit) {
+        containerContext.scope.launch {
+            Syntax(containerContext.copy(scope = this)).block()
+        }
+    }
+
+    /**
+     * Launches a new subscriber-aware coroutine as a child of the current intent's scope.
+     *
+     * The block runs when [OrbitContainer.refCountStateFlow] or [OrbitContainer.refCountSideEffectFlow]
+     * have active subscribers, and is cancelled when subscribers reach zero (with debounce via
+     * [SettingsBuilder.repeatOnSubscribedStopTimeout]).
+     *
+     * This is useful for collecting hot flows that should only run while the UI is subscribed.
+     *
+     * ```
+     * override val container = scope.orbitContainer<State, SideEffect>(initialState) {
+     *     launchOnSubscription {
+     *         hotFlow.collect { value -> reduce { state.copy(data = value) } }
+     *     }
+     * }
+     * ```
+     *
+     * @param block the lambda to execute when subscribers are active, with access to the orbit DSL.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @OrbitDsl
+    public fun launchOnSubscription(block: suspend Syntax<S, SE>.() -> Unit) {
+        containerContext.scope.launch {
+            val scopedContext = containerContext.copy(scope = this)
+            scopedContext.subscribedCounter.subscribed.mapLatest {
+                if (it.isSubscribed) Syntax(scopedContext).block() else null
+            }.collect()
+        }
+    }
+
+    /**
      * Starts and stops the provided block of code based on the number of subscribers to the
      * [OrbitContainer.refCountStateFlow] and [OrbitContainer.refCountSideEffectFlow].
      *
@@ -75,6 +132,11 @@ public class Syntax<S : Any, SE : Any>(public val containerContext: ContainerCon
      *
      * @param block the lambda to run when we have active subscribers.
      */
+    @Deprecated(
+        message = "Use launchOnSubscription instead. launchOnSubscription provides a Syntax receiver " +
+            "and does not block the calling coroutine, allowing multiple concurrent launches.",
+        replaceWith = ReplaceWith("launchOnSubscription { block() }")
+    )
     @OptIn(ExperimentalCoroutinesApi::class)
     @OrbitDsl
     public suspend fun repeatOnSubscription(

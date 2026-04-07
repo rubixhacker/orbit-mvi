@@ -35,7 +35,7 @@ class DetailViewModel @Inject constructor(
     override val container = orbitContainer<DetailState, Nothing>(DetailState(), savedStateHandle) { requestStock() }
 
     private fun requestStock() = intent(registerIdling = false) {
-        repeatOnSubscription {
+        launchOnSubscription {
             stockRepository.stockDetails(itemName).collect {
                 reduce {
                     state.copy(stock = it)

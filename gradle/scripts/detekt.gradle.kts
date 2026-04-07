@@ -67,4 +67,5 @@ tasks.named("detekt", Detekt::class.java).configure {
 
 dependencies {
     "detektPlugins"(libs.detektFormatting)
+    "detektPlugins"(project(":orbit-lint"))
 }

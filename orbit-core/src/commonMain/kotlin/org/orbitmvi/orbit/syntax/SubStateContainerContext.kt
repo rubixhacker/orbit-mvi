@@ -16,6 +16,7 @@
 
 package org.orbitmvi.orbit.syntax
 
+import kotlinx.coroutines.CoroutineScope
 import org.orbitmvi.orbit.RealSettings
 import org.orbitmvi.orbit.annotation.OrbitInternal
 import org.orbitmvi.orbit.internal.repeatonsubscription.SubscribedCounter
@@ -27,6 +28,7 @@ public data class SubStateContainerContext<S : Any, SE : Any, T : S>(
     private val getState: () -> T,
     public val reduce: suspend ((T) -> S) -> Unit,
     public val subscribedCounter: SubscribedCounter,
+    public val scope: CoroutineScope,
 ) {
     public val state: T
         get() = getState()

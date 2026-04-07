@@ -37,6 +37,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress("DEPRECATION")
 internal class SimpleDslRepeatOnSubscriptionTest {
 
     private val testScope = CoroutineScope(Dispatchers.Unconfined)
@@ -51,7 +52,8 @@ internal class SimpleDslRepeatOnSubscriptionTest {
             postSideEffect = {},
             reduce = {},
             subscribedCounter = testSubscribedCounter,
-            stateFlow = MutableStateFlow(Unit)
+            stateFlow = MutableStateFlow(Unit),
+            scope = testScope
         )
     )
 

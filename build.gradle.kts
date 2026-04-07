@@ -152,17 +152,14 @@ subprojects {
         }
     }
     plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper> {
-        apply(from = "$rootDir/gradle/scripts/jacoco.gradle.kts")
-        configure<org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension> {
-            // for strict mode
-            explicitApi()
+        if (project.name != "orbit-lint") {
+            apply(from = "$rootDir/gradle/scripts/jacoco.gradle.kts")
         }
-    }
-    plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper> {
-        apply(from = "$rootDir/gradle/scripts/jacoco.gradle.kts")
         configure<org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension> {
             // for strict mode
-            explicitApi()
+            if (project.name != "orbit-lint") {
+                explicitApi()
+            }
         }
     }
     plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper> {

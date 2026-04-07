@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Mikołaj Leszczyński & Appmattus Limited
+ * Copyright 2025 Mikołaj Leszczyński & Appmattus Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.orbitmvi.orbit.internal.repeatonsubscription
+package org.orbitmvi.orbit.internal
 
 import app.cash.turbine.test
 import kotlinx.coroutines.test.TestScope
@@ -27,12 +27,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.time.Duration.Companion.milliseconds
 
-@Suppress("DEPRECATION")
-internal class RepeatOnSubscriptionTest {
-    private val initialState = State()
+internal class LaunchOnSubscriptionTest {
+    private val initialState = TestState()
 
     @Test
-    fun block_is_not_executed_when_there_is_no_subscription_to_the_ref_count_state_flow() = runTest {
+    fun block_is_not_executed_without_ref_count_subscription() = runTest {
         val testSubject = TestMiddleware(this)
 
         testSubject.container.stateFlow.test(timeout = 500.milliseconds) {
@@ -46,7 +45,7 @@ internal class RepeatOnSubscriptionTest {
     }
 
     @Test
-    fun block_is_executed_when_there_is_a_subscription_to_the_state_flow() = runTest {
+    fun block_is_executed_with_ref_count_state_subscription() = runTest {
         val testSubject = TestMiddleware(this)
 
         testSubject.container.refCountStateFlow.test {
@@ -54,13 +53,13 @@ internal class RepeatOnSubscriptionTest {
 
             val intentJob = testSubject.updateState { 42 }
 
-            assertEquals(State(42), awaitItem())
+            assertEquals(TestState(42), awaitItem())
             intentJob.cancel()
         }
     }
 
     @Test
-    fun block_is_not_executed_when_there_is_no_subscription_to_the_ref_count_side_effect_flow() = runTest {
+    fun block_is_not_executed_without_ref_count_side_effect_subscription() = runTest {
         val testSubject = TestMiddleware(this)
 
         testSubject.container.sideEffectFlow.test(timeout = 500.milliseconds) {
@@ -72,7 +71,7 @@ internal class RepeatOnSubscriptionTest {
     }
 
     @Test
-    fun block_is_executed_when_there_is_a_subscription_to_the_ref_count_side_effect_flow() = runTest {
+    fun block_is_executed_with_ref_count_side_effect_subscription() = runTest {
         val testSubject = TestMiddleware(this)
 
         testSubject.container.refCountSideEffectFlow.test {
@@ -83,23 +82,23 @@ internal class RepeatOnSubscriptionTest {
         }
     }
 
-    private inner class TestMiddleware(testScope: TestScope) : OrbitContainerHost<State, State, Int> {
-        override val container = testScope.backgroundScope.orbitContainer<State, Int>(initialState)
+    private inner class TestMiddleware(testScope: TestScope) : OrbitContainerHost<TestState, TestState, Int> {
+        override val container = testScope.backgroundScope.orbitContainer<TestState, Int>(initialState)
 
         fun updateState(externalCall: suspend () -> Int) = intent {
-            repeatOnSubscription {
+            launchOnSubscription {
                 val result = externalCall()
-                reduce { State(result) }
+                reduce { TestState(result) }
             }
         }
 
         fun updateSideEffect(externalCall: suspend () -> Int) = intent {
-            repeatOnSubscription {
+            launchOnSubscription {
                 val result = externalCall()
                 postSideEffect(result)
             }
         }
     }
 
-    private data class State(val count: Int = Random.nextInt())
+    private data class TestState(val count: Int = Random.nextInt())
 }

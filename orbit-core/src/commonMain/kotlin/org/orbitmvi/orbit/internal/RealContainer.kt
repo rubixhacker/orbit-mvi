@@ -30,6 +30,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,6 +98,7 @@ public class RealContainer<INTERNAL_STATE : Any, EXTERNAL_STATE : Any, SIDE_EFFE
         reduce = { reducer -> internalStateFlow.update(reducer) },
         subscribedCounter = subscribedCounter,
         stateFlow = stateFlow,
+        scope = scope,
     )
 
     override fun orbit(orbitIntent: suspend ContainerContext<INTERNAL_STATE, SIDE_EFFECT>.() -> Unit): Job {
@@ -109,7 +111,9 @@ public class RealContainer<INTERNAL_STATE : Any, EXTERNAL_STATE : Any, SIDE_EFFE
 
     override suspend fun inlineOrbit(orbitIntent: suspend ContainerContext<INTERNAL_STATE, SIDE_EFFECT>.() -> Unit) {
         initialiseIfNeeded()
-        pluginContext.orbitIntent()
+        coroutineScope {
+            pluginContext.copy(scope = this).orbitIntent()
+        }
     }
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -128,7 +132,8 @@ public class RealContainer<INTERNAL_STATE : Any, EXTERNAL_STATE : Any, SIDE_EFFE
                             job +
                             settings.intentLaunchingDispatcher
                     launch(exceptionHandlerContext) {
-                        runCatching { pluginContext.intent() }.onFailure { e ->
+                        val scopedContext = pluginContext.copy(scope = this)
+                        runCatching { scopedContext.intent() }.onFailure { e ->
                             settings.exceptionHandler?.handleException(coroutineContext, e) ?: throw e
                         }
                     }.invokeOnCompletion { job.complete() }

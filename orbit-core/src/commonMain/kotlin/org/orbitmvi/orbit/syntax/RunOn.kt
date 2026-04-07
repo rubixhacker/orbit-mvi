@@ -80,6 +80,7 @@ public inline fun <S : Any, SE : Any, reified T : S> ContainerContext<S, SE>.toS
             }
         },
         subscribedCounter = subscribedCounter,
-        getState = { capturedState }
+        getState = { capturedState },
+        scope = scope
     )
 }
